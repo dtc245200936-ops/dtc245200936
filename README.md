@@ -8,7 +8,7 @@
 
 ![Sơ đồ kiến trúc triển khai](docs/architecture.svg)
 
-Luồng truy cập: trình duyệt → Nginx (`:80`) → ứng dụng Express (`:3000`, chỉ nội bộ) → PostgreSQL (`:5432`, chỉ nội bộ). Prometheus thu thập metrics từ ứng dụng, Nginx, PostgreSQL và cAdvisor; Grafana hiển thị dashboard. Ứng dụng và Nginx ghi log vào volume dùng chung với Promtail; Promtail chuyển log sang Loki. Không cần gắn Docker socket vào Promtail.
+Luồng truy cập: trình duyệt → Nginx (`:80`) → ứng dụng Express (`:3000`, chỉ nội bộ) → PostgreSQL (`:5432`, chỉ nội bộ). Docker network `edge` cho phép host truy cập các cổng được publish; các mạng `frontend`, `data` và `monitoring` vẫn được cô lập nội bộ để phân tách luồng east-west. Prometheus thu thập metrics từ ứng dụng, Nginx, PostgreSQL và cAdvisor; Grafana hiển thị dashboard. Ứng dụng và Nginx ghi log vào volume dùng chung với Promtail; Promtail chuyển log sang Loki. Không cần gắn Docker socket vào Promtail.
 
 ## Yêu cầu
 
@@ -85,7 +85,7 @@ pgAdmin đăng nhập bằng tài khoản quản trị để có thể quản l�
 
 ## Cấu hình, mạng và bảo mật
 
-- Ba bridge network tách luồng `frontend`, `data`, `monitoring`; database không có cổng public, app và Nginx chỉ có endpoint cần thiết.
+- Các bridge network tách luồng `edge` (cổng publish), `frontend`, `data`, `monitoring`; database không có cổng public, app và Nginx chỉ có endpoint cần thiết. Cổng quản trị/metrics chỉ bind loopback trên host.
 - Ứng dụng chạy bằng user `node`, filesystem read-only, bỏ Linux capabilities, `no-new-privileges`, tmpfs riêng, giới hạn PID và CPU/RAM.
 - Nginx chạy non-root trên cổng container 8080, filesystem read-only và có CSP, `X-Frame-Options`, `X-Content-Type-Options`, `Referrer-Policy`, tắt lộ phiên bản.
 - API giới hạn kích thước JSON, validate dữ liệu và dùng truy vấn PostgreSQL tham số hóa. Ứng dụng dùng `APP_DB_USER` chỉ có quyền CRUD trên bảng và `pg_monitor`, không dùng superuser `POSTGRES_USER`.

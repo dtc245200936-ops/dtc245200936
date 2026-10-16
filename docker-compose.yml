@@ -83,6 +83,7 @@ services:
         condition: service_healthy
     networks:
       - data
+      - edge
     volumes:
       - pgadmin_data:/var/lib/pgadmin
 
@@ -105,6 +106,7 @@ services:
       - no-new-privileges:true
     networks:
       - frontend
+      - edge
       - monitoring
     volumes:
       - nginx_logs:/var/log/nginx
@@ -129,6 +131,7 @@ services:
       - prometheus_data:/prometheus
     networks:
       - monitoring
+      - edge
     depends_on:
       - app
       - postgres-exporter
@@ -162,6 +165,7 @@ services:
       - ./monitoring/grafana/dashboards:/var/lib/grafana/dashboards:ro
     networks:
       - monitoring
+      - edge
     depends_on:
       - prometheus
       - loki
@@ -222,6 +226,7 @@ services:
       - loki_data:/loki
     networks:
       - monitoring
+      - edge
     security_opt:
       - no-new-privileges:true
 
@@ -242,6 +247,8 @@ services:
       - no-new-privileges:true
 
 networks:
+  edge:
+    driver: bridge
   frontend:
     driver: bridge
     internal: true
