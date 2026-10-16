@@ -70,10 +70,10 @@ pgAdmin đăng nhập bằng tài khoản quản trị để có thể quản l�
    ```logql
    {job="crm-app"}
    {job="crm-app", type="http"}
-   {job="nginx"} |~ " 5[0-9][0-9] "
+   {job="nginx"}
    ```
 
-   Gửi một vài request tới CRM trước khi demo để phát sinh log/metrics; có thể chờ 15–30 giây để Prometheus scrape dữ liệu.
+   Chọn time range **Last 15 minutes**, chạy từng truy vấn riêng và gửi request tới CRM để phát sinh log. Nếu muốn tìm lỗi 5xx, có thể dùng `{job="nginx"} |~ " 5[0-9][0-9] "`; truy vấn này chỉ có kết quả khi Nginx thực sự ghi nhận response 5xx, nên rỗng khi hệ thống đang hoạt động bình thường. Chờ vài giây để Promtail chuyển log sang Loki.
 4. Kiểm tra health và security headers:
 
    ```powershell
