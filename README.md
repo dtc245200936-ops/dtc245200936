@@ -81,7 +81,26 @@ pgAdmin đăng nhập bằng tài khoản quản trị để có thể quản l�
    Invoke-RestMethod http://localhost/health
    ```
 
-5. Kiểm tra trạng thái từng service bằng `docker compose ps`; xem log với `docker compose logs --tail 100 app nginx db`.
+5. Mở PowerShell, chuyển tới thư mục dự án rồi kiểm tra trạng thái các service:
+
+   ```powershell
+   cd "C:\Users\khacb\OneDrive\Desktop\triển khai"
+   docker compose ps
+   ```
+
+   Kiểm tra cột `STATUS`: `Up` nghĩa là container đang chạy; `healthy` nghĩa là health check đã thành công. Xem 100 dòng log gần nhất của ứng dụng, Nginx và PostgreSQL:
+
+   ```powershell
+   docker compose logs --tail 100 app nginx db
+   ```
+
+   Muốn theo dõi log trực tiếp khi gửi request tới website, dùng:
+
+   ```powershell
+   docker compose logs -f app nginx db
+   ```
+
+   Nhấn `Ctrl+C` để dừng theo dõi log; thao tác này không dừng các container.
 
 ## Cấu hình, mạng và bảo mật
 
