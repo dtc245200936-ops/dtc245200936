@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Báo cáo triển khai CRM chăm sóc khách hàng</title>
+  <link rel="stylesheet" href="report.css">
+</head>
+<body>
+  <section class="report-page cover">
+    <div>
+      <div class="school">[TÊN TRƯỜNG ĐẠI HỌC / CAO ĐẲNG]<br>[KHOA / BỘ MÔN]</div>
+      <div class="cover-rule"></div>
+      <p class="center"><b>BÁO CÁO HỌC PHẦN</b></p>
+      <h1>Triển khai và quản trị<br>hệ thống phần mềm</h1>
+      <div class="topic">ĐỀ TÀI<br>HỆ THỐNG CRM<br>CHĂM SÓC KHÁCH HÀNG</div>
+      <div class="student">
+        <b>Sinh viên thực hiện:</b> <span class="placeholder">[HỌ VÀ TÊN]</span><br>
+        <b>Mã số sinh viên:</b> <span class="placeholder">[MÃ SỐ SINH VIÊN]</span><br>
+        <b>Lớp:</b> <span class="placeholder">[LỚP]</span><br>
+        <b>Giảng viên hướng dẫn:</b> <span class="placeholder">[TÊN GIẢNG VIÊN]</span>
+      </div>
+    </div>
+    <div class="place">[TỈNH / THÀNH PHỐ] — 2026</div>
+  </section>
+
+  <section class="report-page">
+    <h2>LỜI MỞ ĐẦU</h2>
+    <p>Trong môi trường kinh doanh hiện nay, dữ liệu khách hàng và lịch sử tương tác là một phần quan trọng của hoạt động bán hàng và chăm sóc sau bán. Một hệ thống CRM (Customer Relationship Management) giúp tập trung thông tin, hỗ trợ tra cứu, phân loại khách hàng theo trạng thái và duy trì luồng làm việc có thể quan sát được.</p>
+    <p>Báo cáo trình bày việc xây dựng một ứng dụng CRM mẫu và đóng gói toàn bộ thành phần hạ tầng bằng Docker Compose. Hệ thống sử dụng Node.js/Express cho dịch vụ web, PostgreSQL cho dữ liệu quan hệ, pgAdmin để quản trị cơ sở dữ liệu và Nginx làm reverse proxy. Prometheus, Grafana, cAdvisor và các exporter phụ trách metrics; Loki và Promtail đảm nhiệm tập trung log và truy vấn LogQL.</p>
+    <p>Mục tiêu không chỉ là làm giao diện quản lý khách hàng mà còn mô tả cách các dịch vụ phối hợp, cách kiểm tra trạng thái vận hành và các lựa chọn bảo mật cơ bản. Các cấu hình được lưu cùng mã nguồn để có thể tái tạo môi trường demo, thay vì phụ thuộc vào thao tác cài đặt thủ công trên một máy duy nhất.</p>
+    <div class="callout"><b>Phạm vi:</b> Đây là hệ thống thực hành chạy trên máy cá nhân/lab. Bản mẫu chưa triển khai xác thực người dùng CRM, TLS, sao lưu tự động hoặc cấu hình production HA; không được public trực tiếp ra Internet nếu chưa bổ sung các phần này.</div>
+    <h3>Thông tin sinh viên</h3>
+    <table><tr><th>Trường thông tin</th><th>Nội dung cần điền</th></tr><tr><td>Họ và tên</td><td class="placeholder">[HỌ VÀ TÊN]</td></tr><tr><td>Mã số sinh viên</td><td class="placeholder">[MÃ SỐ SINH VIÊN]</td></tr><tr><td>Lớp / khóa</td><td class="placeholder">[LỚP / KHÓA]</td></tr><tr><td>Giảng viên</td><td class="placeholder">[TÊN GIẢNG VIÊN]</td></tr><tr><td>Repository GitHub</td><td class="placeholder">[URL REPOSITORY CÓ MÃ SỐ SV]</td></tr></table>
+    <h3>Mục lục</h3>
+    <ol class="toc"><li>Tổng quan đề tài và yêu cầu</li><li>Phân tích kiến trúc và luồng hoạt động</li><li>Triển khai ứng dụng và cơ sở dữ liệu</li><li>Nginx reverse proxy và security headers</li><li>Prometheus, Grafana và giám sát</li><li>Loki, Promtail và truy vấn LogQL</li><li>Hardening và kiểm thử</li><li>Kết quả, hạn chế và hướng phát triển</li><li>Quy trình GitHub và hướng dẫn demo</li></ol>
+  </section>
+
+  <section class="report-page">
+    <h2>1. TỔNG QUAN ĐỀ TÀI VÀ YÊU CẦU</h2>
+    <h3>1.1. Bài toán</h3>
+    <p>Đề tài được chọn là Đề 4 — Hệ thống CRM Chăm sóc Khách hàng. Ứng dụng quản lý danh sách khách hàng với các trường họ tên, email, số điện thoại, công ty, ghi chú và trạng thái. Ba trạng thái mẫu gồm tiềm năng (lead), đang chăm sóc (contacted) và đã chuyển đổi (customer). Người dùng có thể tìm kiếm, lọc, thêm và xóa dữ liệu qua trình duyệt.</p>
+    <p>Phần backend cung cấp API REST và kết nối PostgreSQL. Nginx là điểm truy cập duy nhất cho website; cơ sở dữ liệu không publish cổng ra host. pgAdmin được cung cấp để quản trị DB trong môi trường thực hành. Những dịch vụ giám sát/log được tách thành container riêng nhưng cùng khai báo trong một Compose project.</p>
+    <h3>1.2. Yêu cầu được ánh xạ</h3>
+    <table><tr><th>Yêu cầu</th><th>Thành phần thực hiện</th><th>Minh chứng cần chụp khi demo</th></tr>
+      <tr><td>Quản lý mã nguồn, README, 3 commit</td><td>Git repository, README và 3 mốc commit đề xuất</td><td>Trang repository, lịch sử commit</td></tr>
+      <tr><td>Web + Database + công cụ quản lý</td><td>Express, PostgreSQL, pgAdmin</td><td>CRM có dữ liệu và pgAdmin mở bảng customers</td></tr>
+      <tr><td>Reverse proxy</td><td>Nginx, proxy headers, CSP/security headers</td><td>Website qua cổng 80, header response</td></tr>
+      <tr><td>Metrics</td><td>Prometheus, Grafana, exporters, cAdvisor</td><td>Targets UP và dashboard có dữ liệu</td></tr>
+      <tr><td>Log tập trung, 2–3 LogQL</td><td>Promtail đọc volume, Loki lưu log</td><td>Explore Loki với các truy vấn mẫu</td></tr>
+      <tr><td>Hardening</td><td>Non-root, network nội bộ, hạn chế quyền, headers</td><td>Compose config, docker inspect, response headers</td></tr>
+    </table>
+    <h3>1.3. Tiêu chí thành công</h3>
+    <p>Thành công chức năng được đánh giá bằng khả năng chạy toàn bộ stack với `docker compose up -d --build`, API kết nối DB và có thể tạo/tra cứu dữ liệu. Thành công vận hành được đánh giá qua health check, Prometheus targets, dashboard Grafana và khả năng tra cứu log mới bằng LogQL. Tính tái lập được chứng minh bằng cấu hình, hướng dẫn, ảnh chụp và lịch sử commit trong repository.</p>
+  </section>
+
+  <section class="report-page">
+    <h2>2. KIẾN TRÚC VÀ LUỒNG HOẠT ĐỘNG</h2>
+    <p>Kiến trúc gồm các nhóm chức năng chạy trong Docker Compose. Cấu hình mạng tách các luồng frontend, data và monitoring. Trình duyệt chỉ kết nối tới Nginx; Nginx chuyển tiếp request đến Express. Ứng dụng mới được kết nối PostgreSQL và cung cấp endpoint metrics cho Prometheus.</p>
+    <img class="figure" src="../docs/architecture.svg" alt="Sơ đồ kiến trúc hệ thống CRM">
+    <p class="caption">Hình 1. Kiến trúc dịch vụ và các network Docker Compose</p>
+    <h3>2.1. Luồng xử lý một yêu cầu CRM</h3>
+    <ol><li>Người dùng gửi HTTP request tới host port 80, được publish bởi container Nginx.</li><li>Nginx áp dụng response headers và reverse proxy request sang service DNS nội bộ `app:3000`.</li><li>Express kiểm tra đầu vào, thực thi câu SQL tham số hóa qua pool PostgreSQL và trả JSON hoặc HTML.</li><li>PostgreSQL lưu dữ liệu trong named volume để tồn tại sau khi container được tạo lại.</li><li>Middleware HTTP ghi bản ghi JSON vào stdout và file log trong volume; Promtail đọc file volume chỉ đọc, đẩy nội dung tới Loki.</li><li>Prometheus scrape metrics ứng dụng và exporter theo chu kỳ 15 giây. Grafana truy vấn Prometheus/Loki để hiển thị số liệu và log.</li></ol>
+    <h3>2.2. Phân tách network</h3>
+    <p>`frontend` cho phép Nginx và app liên lạc; `data` chỉ dành cho app, PostgreSQL, pgAdmin và PostgreSQL exporter; `monitoring` kết nối các exporter, Prometheus, Grafana, Loki, Promtail và những service cần được scrape. Network đánh dấu internal nhằm tránh mở đường outbound trực tiếp từ các thành phần này. Các cổng quản trị metrics được bind loopback trên host.</p>
+    <p>Volume được dùng cho dữ liệu PostgreSQL, Grafana, Prometheus, Loki và các file log. Việc tách volume dữ liệu khỏi vòng đời container giúp thao tác cập nhật image không xóa dữ liệu. Tuy nhiên, volume không thay thế backup; cần xuất bản sao PostgreSQL định kỳ khi dùng dữ liệu thật.</p>
+  </section>
+
+  <section class="report-page">
+    <h2>3. ỨNG DỤNG CRM VÀ CƠ SỞ DỮ LIỆU</h2>
+    <h3>3.1. Tổ chức ứng dụng</h3>
+    <p>Ứng dụng Node.js/Express phục vụ giao diện tĩnh từ thư mục `public` và REST API dưới tiền tố `/api`. Giao diện hiển thị tổng số bản ghi theo trạng thái, tìm kiếm khách hàng, bộ lọc trạng thái và hộp thoại thêm bản ghi. API cung cấp các thao tác liệt kê, tạo, cập nhật và xóa; mọi thông tin đầu vào được giới hạn kích thước và kiểm tra kiểu/định dạng trước khi lưu.</p>
+    <p>Các truy vấn SQL sử dụng placeholder tham số `$1`, `$2` thay vì ghép giá trị người dùng vào chuỗi SQL. Email có unique constraint; trường trạng thái được giới hạn bằng CHECK constraint ở DB để bảo vệ tính toàn vẹn ngay cả khi API bị bỏ qua. Các index được tạo cho status và thời gian tạo nhằm hỗ trợ tra cứu.</p>
+    <h3>3.2. Mô hình dữ liệu</h3>
+    <table><tr><th>Cột</th><th>Kiểu / ràng buộc</th><th>Ý nghĩa</th></tr>
+      <tr><td>id</td><td>BIGSERIAL, PRIMARY KEY</td><td>Định danh bản ghi</td></tr><tr><td>name</td><td>VARCHAR(120), NOT NULL</td><td>Họ tên khách hàng</td></tr>
+      <tr><td>email</td><td>VARCHAR(254), UNIQUE</td><td>Email duy nhất, chuẩn hóa chữ thường ở API</td></tr><tr><td>phone/company</td><td>VARCHAR giới hạn độ dài</td><td>Thông tin liên hệ và tổ chức</td></tr>
+      <tr><td>status</td><td>CHECK lead/contacted/customer</td><td>Trạng thái chăm sóc</td></tr><tr><td>notes</td><td>TEXT</td><td>Ghi chú nghiệp vụ</td></tr>
+      <tr><td>created_at / updated_at</td><td>TIMESTAMPTZ</td><td>Thời điểm tạo và cập nhật</td></tr></table>
+    <h3>3.3. Khởi tạo và quản trị</h3>
+    <p>Script `database/init.sql` được PostgreSQL entrypoint chạy khi khởi tạo data directory trống. Script tạo bảng, index và ba khách hàng mẫu, có `ON CONFLICT DO NOTHING` để tránh trùng email. Tài khoản DB lấy từ `.env`, ứng dụng không sử dụng user quản trị mặc định `postgres` để xử lý CRUD.</p>
+    <p>pgAdmin được dùng để kiểm tra server, schema, bảng customers và dữ liệu. Tên host DB trong pgAdmin là `db` — DNS service của Compose, không phải `localhost`, vì hai dịch vụ giao tiếp trong network Docker.</p>
+    <div class="image-placeholder">BỔ SUNG ẢNH CHỤP 1<br>Giao diện CRM có danh sách khách hàng và các trạng thái</div>
+    <div class="image-placeholder">BỔ SUNG ẢNH CHỤP 2<br>pgAdmin: bảng customers cùng các bản ghi demo</div>
+  </section>
+
+  <section class="report-page">
+    <h2>4. NGINX REVERSE PROXY VÀ SECURITY HEADERS</h2>
+    <h3>4.1. Cấu hình proxy</h3>
+    <p>Nginx publish cổng 80 của máy host và lắng nghe cổng 8080 không đặc quyền bên trong container. Location `/` chuyển tiếp tới `http://app:3000`, đồng thời đặt các header `Host`, `X-Real-IP`, `X-Forwarded-For` và `X-Forwarded-Proto`. Nhờ vậy backend không cần được publish cổng riêng ra host và có thể nhận metadata của request gốc.</p>
+    <p>Endpoint `/health` của Nginx được dùng trong healthcheck container. Endpoint `/stub_status` chỉ phục vụ nginx exporter trên mạng nội bộ và không được expose qua host. `server_tokens off` hạn chế lộ phiên bản Nginx trong response.</p>
+    <h3>4.2. Header phòng vệ cơ bản</h3>
+    <ul><li>`Content-Security-Policy` chỉ cho phép tài nguyên cùng origin, hạn chế frame, plugin và base URL.</li><li>`X-Content-Type-Options: nosniff` ngăn trình duyệt tự suy đoán MIME type.</li><li>`X-Frame-Options: DENY` hạn chế nhúng giao diện trong frame.</li><li>`Referrer-Policy: strict-origin-when-cross-origin` hạn chế thông tin referrer gửi sang origin khác.</li><li>Ứng dụng tắt header `X-Powered-By` để giảm lộ công nghệ backend.</li></ul>
+    <div class="callout"><b>TLS:</b> cấu hình mẫu dùng HTTP cùng security headers để đáp ứng phương án yêu cầu cơ bản. Không bật HSTS khi chưa có HTTPS hoạt động. Đối với triển khai Internet, đặt TLS termination tại Nginx/ingress với chứng chỉ hợp lệ và chuyển hướng HTTP sang HTTPS sau khi kiểm tra đầy đủ.</div>
+    <h3>4.3. Kiểm tra</h3>
+    <p>Dùng `Invoke-WebRequest -Method Head http://localhost` hoặc `curl -I http://localhost` để xem các header. Dùng `docker compose ps` để chứng minh port public chỉ là Nginx; kiểm tra `docker compose port app 3000` không trả về port mapping. Ảnh chụp thật cần thể hiện URL truy cập CRM qua Nginx và response headers trong Developer Tools/terminal.</p>
+    <div class="image-placeholder">BỔ SUNG ẢNH CHỤP 3<br>Terminal hoặc trình duyệt chứng minh security headers trong response</div>
+  </section>
+
+  <section class="report-page">
+    <h2>5. PROMETHEUS, GRAFANA VÀ GIÁM SÁT</h2>
+    <h3>5.1. Thu thập metrics</h3>
+    <p>Prometheus đọc cấu hình `monitoring/prometheus.yml`, scrape mỗi 15 giây và lưu dữ liệu trong named volume với retention 15 ngày. Ứng dụng sử dụng `prom-client` để xuất default Node.js process metrics cùng histogram độ trễ HTTP. Histogram có nhãn method, route và status code, cho phép tính request rate và latency percentile.</p>
+    <p>Nginx exporter đọc endpoint `stub_status`; PostgreSQL exporter thu thập thông tin database bằng user ứng dụng; cAdvisor thu thập CPU và memory của container. Prometheus có các job riêng để kiểm tra từng target. Tình trạng `UP` cho biết Prometheus kết nối được exporter tại lần scrape gần nhất; không có nghĩa toàn bộ chức năng nghiệp vụ đã được kiểm thử.</p>
+    <h3>5.2. Dashboard</h3>
+    <p>Grafana tự cấu hình datasource Prometheus và Loki bằng provisioning. Dashboard `CRM - System Overview` được lưu bằng JSON để có thể tái tạo, gồm sáu panel:</p>
+    <ol><li>HTTP request/giây của CRM.</li><li>Độ trễ p95 API tính từ histogram.</li><li>Memory working set theo container.</li><li>CPU usage theo container.</li><li>Số session đang hoạt động trên PostgreSQL.</li><li>Số kết nối Nginx active.</li></ol>
+    <p>PromQL chính gồm `sum(rate(crm_http_request_duration_seconds_count[5m]))`, `histogram_quantile(0.95, sum(rate(crm_http_request_duration_seconds_bucket[5m])) by (le))`, `pg_stat_database_numbackends{datname="crm"}` và `nginx_connections_active`. Metrics chỉ có ý nghĩa sau khi tạo traffic và chờ scrape.</p>
+    <h3>5.3. Quy trình kiểm chứng</h3>
+    <p>Mở Prometheus → Status → Targets và xác nhận các job `crm-app`, `nginx`, `postgres`, `cadvisor` ở trạng thái UP. Tiếp theo tạo một số request CRM, mở dashboard Grafana, chọn khoảng thời gian gần nhất và kiểm tra dữ liệu. Khi panel container trống, cần xác minh cAdvisor có thể đọc host runtime; đường dẫn mount và khả năng hỗ trợ phụ thuộc OS/engine.</p>
+    <div class="image-placeholder">BỔ SUNG ẢNH CHỤP 4<br>Prometheus Targets hiển thị app, nginx, postgres và cAdvisor UP</div>
+    <div class="image-placeholder">BỔ SUNG ẢNH CHỤP 5<br>Grafana dashboard có chuỗi metrics thực sau khi tạo traffic</div>
+  </section>
+
+  <section class="report-page">
+    <h2>6. LOKI, PROMTAIL VÀ LOGQL</h2>
+    <h3>6.1. Luồng log</h3>
+    <p>Middleware của Express ghi một dòng JSON cho mỗi response HTTP, gồm thời gian, method, path và status; các lỗi ứng dụng/healthcheck cũng được ghi nhận. Nginx ghi access log và error log vào thư mục log. Các file được lưu trên named volume mà ứng dụng/Nginx ghi và Promtail chỉ mount đọc (`:ro`). Cách này tránh cấp cho Promtail quyền truy cập Docker daemon socket.</p>
+    <p>Promtail theo dõi file log, gán nhãn `job` và `service`, phân tích trường JSON của log ứng dụng rồi gửi batch đến API push của Loki. Loki lưu log vào volume riêng. Log ứng dụng có nhãn level, method, status và type để lọc; không nên gắn nhãn có độ phân biệt quá cao như email khách hàng hoặc URL chứa định danh.</p>
+    <h3>6.2. Các truy vấn LogQL minh họa</h3>
+    <p>Truy vấn toàn bộ log từ ứng dụng CRM:</p><div class="code">{job="crm-app"}</div>
+    <p>Lọc riêng log request HTTP sau khi Promtail parse JSON:</p><div class="code">{job="crm-app", type="http"}</div>
+    <p>Tìm response lỗi 5xx trong access log Nginx:</p><div class="code">{job="nginx"} |~ " 5[0-9][0-9] "</div>
+    <p>Hai truy vấn đầu sử dụng label được sinh từ file JSON; truy vấn Nginx lọc chuỗi status trong access log. Nếu dữ liệu chưa xuất hiện, kiểm tra health của Promtail/Loki, quyền đọc volume, log mới phát sinh và time range Explore.</p>
+    <h3>6.3. Quan sát trong Grafana</h3>
+    <p>Grafana đã provision Loki datasource. Chọn Explore → Loki, dán truy vấn, đặt thời gian 15 phút gần nhất và bấm Run query. Tạo request qua giao diện để thấy log mới; thử truy vấn status 5xx sau khi chủ động tạo request lỗi trong môi trường lab. Không đưa dữ liệu cá nhân/nhạy cảm vào log demo.</p>
+    <div class="image-placeholder">BỔ SUNG ẢNH CHỤP 6<br>Grafana Explore hiển thị LogQL query và kết quả log từ Loki</div>
+  </section>
+
+  <section class="report-page">
+    <h2>7. HARDENING VÀ KIỂM THỬ</h2>
+    <h3>7.1. Biện pháp hardening</h3>
+    <table><tr><th>Biện pháp</th><th>Cách áp dụng</th><th>Giới hạn / lưu ý</th></tr>
+      <tr><td>Non-root</td><td>Ứng dụng dùng user `node`; Nginx dùng user `nginx`, cổng nội bộ 8080</td><td>Kiểm tra image bên thứ ba theo runtime thực tế</td></tr>
+      <tr><td>Filesystem</td><td>App, Nginx, Prometheus dùng read-only filesystem; thư mục ghi tạm dùng tmpfs</td><td>Named volume vẫn cho phép ghi dữ liệu cần thiết</td></tr>
+      <tr><td>Capabilities</td><td>App/Nginx drop toàn bộ Linux capabilities, no-new-privileges</td><td>cAdvisor cần quan sát host theo quyền mount đặc thù</td></tr>
+      <tr><td>Network isolation</td><td>Bridge internal tách frontend/data/monitoring; DB không publish</td><td>Người có quyền Docker host vẫn kiểm soát container</td></tr>
+      <tr><td>Secrets</td><td>Mật khẩu lấy từ `.env`, file bị ignore</td><td>Compose environment không phải secret manager production</td></tr>
+      <tr><td>Input/SQL</td><td>Giới hạn payload, validate, SQL parameter binding, constraint DB</td><td>CRM chưa có đăng nhập/phân quyền người dùng</td></tr>
+      <tr><td>HTTP headers</td><td>CSP, chống sniff/frame, referrer policy, ẩn phiên bản</td><td>Chưa thay thế TLS, xác thực hoặc WAF</td></tr>
+      <tr><td>Giới hạn tài nguyên</td><td>App/DB có giới hạn CPU/RAM; app giới hạn PID</td><td>Cần điều chỉnh theo tải thực</td></tr></table>
+    <h3>7.2. Danh sách kiểm thử</h3>
+    <ul><li>Compose parse cấu hình không lỗi (`docker compose config`).</li><li>DB healthcheck sẵn sàng trước khi app khởi động; endpoint `/health` trả trạng thái DB.</li><li>CRUD: liệt kê, tạo dữ liệu hợp lệ, từ chối dữ liệu sai, xử lý email trùng, cập nhật và xóa.</li><li>Người dùng ngoài host chỉ nhìn thấy port CRM; Grafana/pgAdmin/Prometheus/Loki được bind loopback.</li><li>Targets Prometheus UP và dashboard nhận metrics sau khi có request.</li><li>Log ứng dụng/Nginx được Promtail chuyển sang Loki, truy vấn LogQL trả về dòng log.</li><li>Xác nhận `.env` không nằm trong danh sách file được commit.</li></ul>
+    <div class="callout"><b>Giới hạn cAdvisor:</b> thu thập metrics container thường yêu cầu mount một phần filesystem/runtime host. Trên Docker Desktop, một số mount/metric có thể không hoạt động như Linux. Cần mô tả kết quả của đúng máy demo thay vì khẳng định tất cả môi trường cho cùng kết quả.</div>
+  </section>
+
+  <section class="report-page">
+    <h2>8. KẾT QUẢ, HẠN CHẾ VÀ HƯỚNG PHÁT TRIỂN</h2>
+    <h3>8.1. Kết quả đạt được</h3>
+    <p>Dự án cung cấp một CRM demo dùng PostgreSQL, có công cụ quản trị DB và chạy qua reverse proxy. Tất cả thành phần được khai báo trong Docker Compose, tạo thuận lợi để dựng lại trên máy khác. Giao diện hỗ trợ tìm kiếm, lọc, thêm và xóa khách hàng; schema có ràng buộc dữ liệu và API dùng truy vấn tham số.</p>
+    <p>Prometheus được cấu hình scrape ứng dụng, Nginx exporter, PostgreSQL exporter và cAdvisor. Grafana có datasource và dashboard provisioned. Loki/Promtail cung cấp luồng log tập trung cùng các truy vấn LogQL mẫu. Hệ thống áp dụng nhiều lớp hardening phù hợp môi trường lab: non-root, network nội bộ, giảm quyền container, read-only filesystem, giới hạn tài nguyên, security headers và quản lý mật khẩu ngoài source.</p>
+    <h3>8.2. Hạn chế đã biết</h3>
+    <ul><li>Chưa có đăng nhập, phân quyền, lịch sử thay đổi và CSRF protection; không public ứng dụng demo ra Internet.</li><li>HTTP chưa mã hóa lưu lượng; security headers không thay thế HTTPS.</li><li>Mật khẩu trong `.env` là cách thực hành đơn giản; production cần secret manager, rotate credential và quản lý quyền truy cập.</li><li>Không có backup/restore tự động, migration framework, HA hoặc cảnh báo vận hành.</li><li>cAdvisor phụ thuộc quyền mount/runtime của host và có thể cần điều chỉnh trên Docker Desktop.</li><li>Danh sách mẫu nhỏ, chưa có pagination server-side, import/export, dashboard nghiệp vụ doanh thu hoặc kiểm thử tải.</li></ul>
+    <h3>8.3. Hướng phát triển</h3>
+    <p>Ưu tiên kế tiếp là xác thực người dùng với vai trò tối thiểu, TLS, rate limiting, audit trail và quy trình quản lý secret an toàn. Sau đó có thể thêm migration versioned, backup PostgreSQL, cảnh báo Prometheus, dashboard SLO, chính sách retention log, pagination, phân công nhân viên chăm sóc và kiểm thử tự động API. Trước khi triển khai thật cần rà soát bảo mật độc lập, pin image theo digest và thử phục hồi backup.</p>
+    <h3>8.4. Kết luận</h3>
+    <p>Đề tài cho thấy cách đóng gói ứng dụng và các thành phần quan sát hệ thống vào một môi trường nhất quán. Điểm quan trọng trong demo là giải thích được luồng request/DB, khác biệt giữa metrics và logs, vai trò reverse proxy, giới hạn của hardening và cách xác minh bằng công cụ — không chỉ dừng ở việc container báo trạng thái running.</p>
+  </section>
+
+  <section class="report-page">
+    <h2>9. QUẢN LÝ GITHUB VÀ KỊCH BẢN DEMO</h2>
+    <h3>9.1. Repository và commit</h3>
+    <p>Tạo repository public/private theo yêu cầu học phần, đặt tên gắn mã số sinh viên, ví dụ `[MSSV]-crm-customer-care`. Repository nên có source, SQL khởi tạo, Compose, cấu hình Nginx/Prometheus/Grafana/Loki/Promtail, README và báo cáo. Không commit `.env`, mật khẩu thật, token hoặc dữ liệu khách hàng thật.</p>
+    <ol><li><b>Commit 1 — web, database, reverse proxy:</b> source CRM, Dockerfile, PostgreSQL, pgAdmin, Nginx reverse proxy/security headers, tài liệu khởi chạy ban đầu.</li><li><b>Commit 2 — monitoring:</b> Prometheus, exporters, cAdvisor, Grafana provisioning và dashboard.</li><li><b>Commit 3 — logging, hardening, báo cáo:</b> Loki/Promtail, LogQL, giới hạn quyền/network, README hoàn chỉnh và báo cáo có minh họa.</li></ol>
+    <p>Nội dung commit cần phản ánh thay đổi thực tế và có thể kiểm tra được. Nếu repository đã có lịch sử, không viết lại lịch sử hoặc ép push; tạo commit bổ sung phù hợp thay vì giả lập mốc thời gian.</p>
+    <h3>9.2. Kịch bản demo 5–7 phút</h3>
+    <ol><li>Chạy `docker compose ps`, chỉ rõ service và health status.</li><li>Mở website qua Nginx, tìm kiếm/lọc rồi thêm một khách hàng demo; giải thích các trường và trạng thái.</li><li>Mở pgAdmin, kết nối host `db`, truy vấn bảng customers để chứng minh DB ghi nhận dữ liệu.</li><li>Kiểm tra security headers và chỉ ra DB không publish port ra host.</li><li>Mở Prometheus Targets; chuyển sang dashboard Grafana và giải thích ít nhất một panel web, DB và container.</li><li>Mở Grafana Explore, chạy ba truy vấn LogQL; giải thích label selector và pipeline filter.</li><li>Kết thúc bằng sơ đồ network, volume và các biện pháp hardening; nêu giới hạn xác thực/TLS/cAdvisor.</li></ol>
+    <h3>9.3. Danh mục hình cần hoàn thiện</h3>
+    <ul><li>Hình kiến trúc tổng thể (đã có trong báo cáo).</li><li>Ảnh giao diện CRM và dữ liệu mẫu.</li><li>Ảnh pgAdmin hiển thị bảng PostgreSQL.</li><li>Ảnh response headers Nginx.</li><li>Ảnh Prometheus targets và Grafana dashboard.</li><li>Ảnh Grafana Explore với LogQL và log trả về.</li><li>Ảnh lịch sử 3 commit và trang repository GitHub.</li></ul>
+    <div class="signature"><div><b>GIẢNG VIÊN HƯỚNG DẪN</b><br><br><br>(Ký và ghi rõ họ tên)</div><div><b>SINH VIÊN THỰC HIỆN</b><br><br><br>(Ký và ghi rõ họ tên)</div></div>
+  </section>
+</body>
+</html>

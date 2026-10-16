@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="650" viewBox="0 0 1200 650">
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="#64748b"/></marker>
+    <style>
+      .box{rx:14;stroke-width:2}.title{font:700 18px Arial}.sub{font:14px Arial}.label{font:700 16px Arial;fill:#475569}.edge{stroke:#64748b;stroke-width:2;fill:none;marker-end:url(#arrow)}
+    </style>
+  </defs>
+  <rect width="1200" height="650" fill="#f8fafc"/>
+  <text x="600" y="40" text-anchor="middle" class="title" fill="#172554">Kiến trúc CRM chăm sóc khách hàng — Docker Compose</text>
+  <rect x="35" y="80" width="1130" height="145" rx="18" fill="#eff6ff" stroke="#93c5fd" stroke-dasharray="8 6"/>
+  <text x="55" y="108" class="label">Mạng frontend (internal)</text>
+  <rect class="box" x="70" y="130" width="180" height="70" fill="#fff" stroke="#60a5fa"/><text x="160" y="160" text-anchor="middle" class="title" fill="#1e3a8a">Trình duyệt</text><text x="160" y="182" text-anchor="middle" class="sub" fill="#475569">Host :80</text>
+  <rect class="box" x="365" y="130" width="190" height="70" fill="#fff" stroke="#60a5fa"/><text x="460" y="160" text-anchor="middle" class="title" fill="#1e3a8a">Nginx</text><text x="460" y="182" text-anchor="middle" class="sub" fill="#475569">Reverse proxy :8080</text>
+  <rect class="box" x="690" y="130" width="210" height="70" fill="#fff" stroke="#60a5fa"/><text x="795" y="160" text-anchor="middle" class="title" fill="#1e3a8a">Node.js / Express</text><text x="795" y="182" text-anchor="middle" class="sub" fill="#475569">CRM + API + metrics</text>
+  <path class="edge" d="M250 165 H360"/><path class="edge" d="M555 165 H685"/>
+  <rect x="35" y="265" width="520" height="135" rx="18" fill="#f0fdf4" stroke="#86efac" stroke-dasharray="8 6"/>
+  <text x="55" y="292" class="label">Mạng data (internal)</text>
+  <rect class="box" x="90" y="320" width="200" height="60" fill="#fff" stroke="#4ade80"/><text x="190" y="346" text-anchor="middle" class="title" fill="#166534">PostgreSQL 16</text><text x="190" y="367" text-anchor="middle" class="sub" fill="#475569">DB + volume bền vững</text>
+  <rect class="box" x="355" y="320" width="160" height="60" fill="#fff" stroke="#4ade80"/><text x="435" y="346" text-anchor="middle" class="title" fill="#166534">pgAdmin</text><text x="435" y="367" text-anchor="middle" class="sub" fill="#475569">Host 127.0.0.1:5050</text>
+  <path class="edge" d="M765 205 C700 270 360 260 250 315"/><path class="edge" d="M290 350 H350"/>
+  <rect x="595" y="265" width="570" height="135" rx="18" fill="#faf5ff" stroke="#d8b4fe" stroke-dasharray="8 6"/>
+  <text x="615" y="292" class="label">Mạng monitoring (internal)</text>
+  <rect class="box" x="625" y="320" width="160" height="60" fill="#fff" stroke="#c084fc"/><text x="705" y="346" text-anchor="middle" class="title" fill="#6b21a8">Prometheus</text><text x="705" y="367" text-anchor="middle" class="sub" fill="#475569">Scrape 15 giây</text>
+  <rect class="box" x="845" y="320" width="125" height="60" fill="#fff" stroke="#c084fc"/><text x="907" y="346" text-anchor="middle" class="title" fill="#6b21a8">Grafana</text><text x="907" y="367" text-anchor="middle" class="sub" fill="#475569">Dashboard</text>
+  <rect class="box" x="1020" y="320" width="120" height="60" fill="#fff" stroke="#c084fc"/><text x="1080" y="346" text-anchor="middle" class="title" fill="#6b21a8">Exporters</text><text x="1080" y="367" text-anchor="middle" class="sub" fill="#475569">Web / DB / host</text>
+  <path class="edge" d="M785 350 H840"/><path class="edge" d="M1020 350 H975"/>
+  <rect x="210" y="450" width="780" height="150" rx="18" fill="#fff7ed" stroke="#fdba74" stroke-dasharray="8 6"/>
+  <text x="230" y="478" class="label">Đường đi log — volume dùng chung, Promtail không truy cập Docker socket</text>
+  <rect class="box" x="255" y="510" width="190" height="65" fill="#fff" stroke="#fb923c"/><text x="350" y="539" text-anchor="middle" class="title" fill="#9a3412">App + Nginx</text><text x="350" y="560" text-anchor="middle" class="sub" fill="#475569">Ghi log vào volume</text>
+  <rect class="box" x="505" y="510" width="170" height="65" fill="#fff" stroke="#fb923c"/><text x="590" y="539" text-anchor="middle" class="title" fill="#9a3412">Promtail</text><text x="590" y="560" text-anchor="middle" class="sub" fill="#475569">Đọc volume :ro</text>
+  <rect class="box" x="735" y="510" width="150" height="65" fill="#fff" stroke="#fb923c"/><text x="810" y="539" text-anchor="middle" class="title" fill="#9a3412">Loki</text><text x="810" y="560" text-anchor="middle" class="sub" fill="#475569">Lưu + LogQL</text>
+  <path class="edge" d="M445 542 H500"/><path class="edge" d="M675 542 H730"/><path class="edge" d="M810 510 C900 450 900 420 900 385"/>
+</svg>
