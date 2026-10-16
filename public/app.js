@@ -73,10 +73,11 @@ $('#cancel-dialog').addEventListener('click', () => dialog.close());
 
 $('#customer-form').addEventListener('submit', async (event) => {
   event.preventDefault();
+  const customerForm = event.currentTarget;
   const submit = event.submitter;
   submit.disabled = true;
   $('#form-error').textContent = '';
-  const form = new FormData(event.currentTarget);
+  const form = new FormData(customerForm);
   const customer = Object.fromEntries(form.entries());
   try {
     const response = await fetch('/api/customers', {
@@ -86,7 +87,7 @@ $('#customer-form').addEventListener('submit', async (event) => {
     });
     const payload = response.status === 204 ? null : await response.json();
     if (!response.ok) throw new Error(payload.error || 'Không thể lưu khách hàng.');
-    event.currentTarget.reset();
+    customerForm.reset();
     dialog.close();
     await loadCustomers();
     showToast('Đã thêm khách hàng thành công.');

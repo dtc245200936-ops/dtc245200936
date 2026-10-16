@@ -16,6 +16,17 @@ Luồng truy cập: trình duyệt → Nginx (`:80`) → ứng dụng Express (`
 - RAM khuyến nghị 4 GB trở lên; các container được giới hạn tài nguyên ở mức phù hợp cho máy thực hành.
 - Git để quản lý mã nguồn.
 
+## Clone mã nguồn
+
+Trong PowerShell, clone repository GitHub và chuyển vào thư mục dự án:
+
+```powershell
+git clone https://github.com/dtc245200936-ops/dtc245200936.git
+cd dtc245200936
+```
+
+Repository dùng branch chính `main`. File `.env` chứa mật khẩu cục bộ và không được commit; chỉ file `.env.example` được quản lý trên GitHub.
+
 ## Khởi chạy
 
 Trong PowerShell, mở thư mục dự án rồi chạy:
@@ -127,22 +138,25 @@ docker compose down -v
 
 ## GitHub và 3 commit yêu cầu
 
-Đổi tên repository theo mã số sinh viên, ví dụ `20241234-crm-customer-care`, rồi tạo repository GitHub trống. Thứ tự commit nên thể hiện rõ từng mốc chấm:
+Repository: <https://github.com/dtc245200936-ops/dtc245200936>. Branch chính là `main`; lịch sử commit thể hiện các mốc triển khai theo thứ tự:
 
-1. `feat: deploy CRM database and Nginx reverse proxy` — source, DB, pgAdmin, Nginx và security headers.
+1. `feat: add CRM database and Nginx reverse proxy` — source, DB, pgAdmin, Nginx và security headers.
 2. `feat: add Prometheus and Grafana monitoring` — exporters, Prometheus scrape config, Grafana datasource/dashboard.
 3. `feat: add Loki logging and system hardening` — Promtail/LogQL, Compose hardening, báo cáo, README và hình minh họa.
 
-Sau khi tạo repository trên GitHub, thêm remote và push branch chính:
+Các commit sửa lỗi và cập nhật tài liệu được ghi tiếp sau ba mốc trên. Để xem branch và lịch sử:
 
 ```powershell
-git remote add origin https://github.com/<github-user>/<ma-so-sv>-crm-customer-care.git
-git branch -M main
-git push -u origin main
+git branch -a
+git log --oneline
 ```
 
-Repository hiện được tạo trong thư mục cục bộ; chưa có remote GitHub do cần tài khoản/owner repository của sinh viên.
+Sau khi sửa mã nguồn, có thể cập nhật repository bằng:
 
-## Báo cáo
+```powershell
+git add .
+git commit -m "docs: describe the change"
+git push origin main
+```
 
-Mở [report/bao-cao.html](report/bao-cao.html) trong trình duyệt, thay các trường `[ĐIỀN ...]`, kiểm tra phân trang rồi **Print → Save as PDF**. Báo cáo có 11 trang bố cục in A4, hình kiến trúc và sơ đồ luồng. Bổ sung ảnh chụp màn hình thật từ buổi demo vào các vị trí được chỉ rõ trong báo cáo.
+Không commit `.env` hoặc mật khẩu thật; kiểm tra `git status` trước khi tạo commit.
