@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="CRM cham soc khach hang">
+  <title>CRM | Chăm sóc khách hàng</title>
+  <link rel="stylesheet" href="/styles.css">
+  <script src="/app.js" defer></script>
+</head>
+<body>
+  <aside class="sidebar">
+    <a class="brand" href="/" aria-label="CRM trang chủ"><span class="brand-mark">C</span><span>careflow</span></a>
+    <p class="nav-label">KHÔNG GIAN LÀM VIỆC</p>
+    <a class="nav-item active" href="/"><span>▦</span> Tổng quan</a>
+    <a class="nav-item" href="#customers"><span>♙</span> Khách hàng</a>
+    <a class="nav-item" href="#customers"><span>◷</span> Hoạt động</a>
+    <div class="sidebar-bottom">
+      <div class="avatar">AD</div><div><strong>Quản trị viên</strong><small>CRM Workspace</small></div>
+      <span class="online-dot"></span>
+    </div>
+  </aside>
+  <main class="main">
+    <header class="topbar">
+      <div class="breadcrumb">Workspace <span>/</span> <strong>Tổng quan</strong></div>
+      <div class="top-actions"><span class="today" id="today"></span><button class="icon-button" aria-label="Thông báo">♧</button><div class="avatar small">AD</div></div>
+    </header>
+    <section class="page-heading">
+      <div><p class="eyebrow" id="today-label">TỔNG QUAN CRM</p><h1>Chào buổi sáng 👋</h1><p class="subheading">Đây là những gì đang diễn ra với khách hàng của bạn.</p></div>
+      <button class="primary-button" id="add-customer"><span>＋</span> Thêm khách hàng</button>
+    </section>
+    <section class="stats-grid" aria-label="Thống kê khách hàng">
+      <article class="stat-card"><div class="stat-top"><span>Tổng khách hàng</span><span class="stat-icon purple">♙</span></div><strong id="total-count">—</strong><small><span class="positive">↑ 12.5%</span> so với tháng trước</small><div class="sparkline purple-line">▂▃▂▄▅▄▆▅▇</div></article>
+      <article class="stat-card"><div class="stat-top"><span>Khách hàng tiềm năng</span><span class="stat-icon blue">◉</span></div><strong id="lead-count">—</strong><small><span class="positive">↑ 8.2%</span> so với tháng trước</small><div class="sparkline blue-line">▂▃▄▂▄▅▄▆▇</div></article>
+      <article class="stat-card"><div class="stat-top"><span>Đang chăm sóc</span><span class="stat-icon orange">◷</span></div><strong id="contacted-count">—</strong><small><span class="positive">↑ 4.3%</span> so với tháng trước</small><div class="sparkline orange-line">▃▂▄▃▅▄▆▅▇</div></article>
+      <article class="stat-card"><div class="stat-top"><span>Đã chuyển đổi</span><span class="stat-icon green">✓</span></div><strong id="customer-count">—</strong><small><span class="positive">↑ 16.8%</span> so với tháng trước</small><div class="sparkline green-line">▂▃▃▄▅▄▆▇▇</div></article>
+    </section>
+    <section class="content-card" id="customers">
+      <div class="card-heading"><div><h2>Khách hàng gần đây</h2><p>Theo dõi và quản lý các mối quan hệ khách hàng.</p></div><div class="toolbar"><label class="search-box"><span>⌕</span><input id="search" type="search" placeholder="Tìm tên, email..." aria-label="Tìm khách hàng"></label><select class="filter-button" id="filter-status" aria-label="Lọc theo trạng thái"><option value="">Tất cả trạng thái</option><option value="lead">Tiềm năng</option><option value="contacted">Đang chăm sóc</option><option value="customer">Đã chuyển đổi</option></select></div></div>
+      <div class="table-scroll"><table><thead><tr><th>KHÁCH HÀNG</th><th>CÔNG TY</th><th>SỐ ĐIỆN THOẠI</th><th>TRẠNG THÁI</th><th>NGÀY TẠO</th><th></th></tr></thead><tbody id="customer-rows"><tr><td colspan="6" class="empty">Đang tải dữ liệu...</td></tr></tbody></table></div>
+      <div class="table-footer"><span id="result-count">Đang tải...</span><div><button disabled>← Trước</button><button class="page-number">1</button><button disabled>Sau →</button></div></div>
+    </section>
+    <footer>© 2026 Careflow CRM <span>Hệ thống quản lý quan hệ khách hàng</span></footer>
+  </main>
+  <dialog id="customer-dialog">
+    <form id="customer-form">
+      <div class="dialog-heading"><div><p class="eyebrow">HỒ SƠ KHÁCH HÀNG</p><h2>Thêm khách hàng</h2></div><button type="button" class="close-button" id="close-dialog" aria-label="Đóng">×</button></div>
+      <label>Họ và tên <input name="name" required maxlength="120" placeholder="Nguyễn Văn A"></label>
+      <label>Email <input name="email" required type="email" maxlength="254" placeholder="name@example.com"></label>
+      <div class="form-row"><label>Số điện thoại <input name="phone" maxlength="30" placeholder="0901234567"></label><label>Công ty <input name="company" maxlength="120" placeholder="Tên công ty"></label></div>
+      <label>Trạng thái <select name="status"><option value="lead">Tiềm năng</option><option value="contacted">Đang chăm sóc</option><option value="customer">Đã chuyển đổi</option></select></label>
+      <label>Ghi chú <textarea name="notes" maxlength="2000" rows="3" placeholder="Thông tin cần lưu ý..."></textarea></label>
+      <p class="form-error" id="form-error" role="alert"></p>
+      <div class="dialog-actions"><button type="button" class="filter-button" id="cancel-dialog">Hủy</button><button class="primary-button" type="submit">Lưu khách hàng</button></div>
+    </form>
+  </dialog>
+  <div id="toast" role="status" aria-live="polite"></div>
+</body>
+</html>

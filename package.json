@@ -1,0 +1,19 @@
+{
+  "name": "crm-khach-hang",
+  "version": "1.0.0",
+  "private": true,
+  "description": "CRM cham soc khach hang - Docker Compose demo",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "test": "node --test"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "express": "^4.21.2",
+    "pg": "^8.13.1",
+    "prom-client": "^15.1.3"
+  }
+}
