@@ -53,6 +53,36 @@ docker compose ps
 | Prometheus | http://localhost:9090 | Không có tài khoản; chỉ bind loopback |
 | Loki API | http://localhost:3100 | Không có tài khoản; chỉ bind loopback |
 
+### Chạy riêng Loki hoặc Grafana
+
+Chạy các lệnh trong PowerShell tại thư mục dự án, nơi có `docker-compose.yml` và file `.env`.
+
+Để chạy Loki cùng Promtail (Promtail gửi log vào Loki):
+
+```powershell
+docker compose up -d loki promtail
+docker compose ps loki promtail
+```
+
+Loki API chỉ bind trên máy local tại http://localhost:3100. Để dừng hai service này:
+
+```powershell
+docker compose stop promtail loki
+```
+
+Để chạy Grafana:
+
+```powershell
+docker compose up -d grafana
+docker compose ps grafana prometheus loki
+```
+
+Docker Compose tự khởi chạy các service phụ thuộc cần thiết cho Grafana, bao gồm Prometheus và Loki. Mở http://localhost:3000 và đăng nhập bằng `GRAFANA_ADMIN_USER` / `GRAFANA_ADMIN_PASSWORD` trong `.env`. Để dừng riêng Grafana:
+
+```powershell
+docker compose stop grafana
+```
+
 ### Kết nối pgAdmin tới PostgreSQL
 
 Trong pgAdmin, chọn **Register → Server**:
