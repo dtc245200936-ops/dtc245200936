@@ -67,6 +67,13 @@ Trong pgAdmin, chọn **Register → Server**:
 
 pgAdmin đăng nhập bằng tài khoản quản trị để có thể quản lý schema; ứng dụng và PostgreSQL exporter dùng tài khoản quyền hạn chế `APP_DB_USER` / `APP_DB_PASSWORD`. PostgreSQL không publish cổng ra máy host; pgAdmin truy cập DB qua network Docker nội bộ.
 
+Để xem danh sách khách hàng mới nhất trong pgAdmin, mở **Tools → Query Tool**, chạy truy vấn sau và nhấn **Execute** (▶ hoặc `F5`):
+
+```sql
+SELECT * FROM public.customers
+ORDER BY id ASC;
+```
+
 ## Kiểm tra và demo
 
 1. Mở CRM; tìm kiếm, lọc theo trạng thái, thêm khách hàng và xóa khách hàng. API có `GET/POST/PATCH/DELETE /api/customers`; ví dụ:
@@ -75,7 +82,7 @@ pgAdmin đăng nhập bằng tài khoản quản trị để có thể quản l�
    Invoke-RestMethod http://localhost/api/customers
    ```
 
-2. Trong Grafana mở **Dashboards → CRM → CRM - System Overview**. Các panel dùng Prometheus cho request rate/latency, CPU/RAM container, session PostgreSQL và kết nối Nginx.
+2. Mở Grafana tại http://localhost:3000 và đăng nhập bằng `GRAFANA_ADMIN_USER` / `GRAFANA_ADMIN_PASSWORD` trong file `.env`. Sau đó chọn **Dashboards → CRM → CRM - System Overview**. Các panel dùng Prometheus cho request rate/latency, CPU/RAM container, session PostgreSQL và kết nối Nginx.
 3. Mở **Explore → Loki** và thử LogQL:
 
    ```logql
@@ -95,7 +102,7 @@ pgAdmin đăng nhập bằng tài khoản quản trị để có thể quản l�
 5. Mở PowerShell, chuyển tới thư mục dự án rồi kiểm tra trạng thái các service:
 
    ```powershell
-   cd "C:\Users\khacb\OneDrive\Desktop\triển khai"
+   cd "C:\Users\khacb\OneDrive\Desktop\Dự án triển khai"
    docker compose ps
    ```
 
